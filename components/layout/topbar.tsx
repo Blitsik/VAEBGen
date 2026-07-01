@@ -21,7 +21,7 @@ export function Topbar({ activeTab, onTabChange }: TopbarProps) {
           <Image src="/cloud.ico" alt="Logo" width={20} height={20} className="object-cover"
           />
         </div>
-        <span className="text-[15px] font-semibold tracking-tight">WARP Generator by llimonix</span>
+        <span className="text-[15px] font-semibold tracking-tight">WARP Generator</span>
       </div>
 
       <nav className="flex gap-1">

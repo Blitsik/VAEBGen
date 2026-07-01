@@ -1,9 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { FaGithub } from "react-icons/fa";
 
-const GITHUB_URL = 'https://github.com/nellimonix/warp-config-generator-vercel';
+const TG_URL = 'https://t.me/vaeb_ai';
 
 function SidebarLink({ href, icon, children }: {
   href: string; icon: React.ReactNode; children: React.ReactNode;
@@ -36,8 +35,10 @@ export function Sidebar() {
         />
       </div>
 
-      <SidebarLink href={GITHUB_URL} icon={<FaGithub />}>
-        GitHub
+      <SidebarLink href={TG_URL} icon={
+        <Image src="/tg.jpg" alt="Telegram" width={20} height={20} className="rounded" />
+      }>
+        Telegram
       </SidebarLink>
 
       <div className="flex-1 min-h-[16px]" />

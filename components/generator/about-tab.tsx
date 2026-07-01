@@ -146,7 +146,7 @@ export function AboutTab() {
             </span>
           ))}
         </div>
-        <p className="text-[13px] text-[var(--text-dim)] mt-4">MIT License · nellimonix</p>
+
       </div>
 
       {/* Clients */}
