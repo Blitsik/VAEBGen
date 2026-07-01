@@ -1,0 +1,304 @@
+'use client';
+
+import { useState } from 'react';
+import { useGenerator } from '@/hooks/use-generator';
+import { isCommunityDns } from '@/config/dns';
+import { CONFIG_FORMATS } from '@/config/formats';
+import { DNS_PROVIDERS } from '@/config/dns';
+import { ServicePicker } from './service-picker';
+import type { ServiceEntry } from '@/types';
+import type { ConfigFormat, DeviceType, SiteMode } from '@/types';
+
+interface Props { services: ServiceEntry[]; }
+
+interface DropdownItem { id: string; label: string; }
+
+function Dropdown({ label, value, options, onChange }: {
+  label: string; value: string; options: DropdownItem[]; onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const cur = options.find((o) => o.id === value);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div onClick={() => setOpen((o) => !o)} style={{
+        background: open ? '#fff' : 'var(--surface-2)',
+        border: `1px solid ${open ? 'var(--accent)' : 'transparent'}`,
+        boxShadow: open ? '0 0 0 4px var(--accent-soft)' : 'none',
+        borderRadius: 'var(--radius-md)', padding: '13px 16px',
+        cursor: 'pointer', transition: '.15s', userSelect: 'none' as const,
+      }}>
+        <p style={{ fontSize: 11, color: 'var(--text-dim)', fontWeight: 600, margin: '0 0 3px' }}>{label}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <span style={{ fontSize: 13.5, fontWeight: 700 }}>{cur?.label ?? value}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            style={{ transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none', color: open ? 'var(--accent-deep)' : 'var(--text-dim)', flexShrink: 0 }}>
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" />
+          </svg>
+        </div>
+      </div>
+      {open && (
+        <div style={{
+          position: 'absolute', left: 0, right: 0, top: 'calc(100% + 6px)',
+          zIndex: 20, background: '#fff', border: '1px solid var(--line)',
+          borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-lg)',
+          padding: 6, maxHeight: 210, overflow: 'auto',
+        }}>
+          {options.map((opt) => (
+            <button key={opt.id} onClick={() => { onChange(opt.id); setOpen(false); }}
+              style={{
+                display: 'block', width: '100%', textAlign: 'left',
+                background: opt.id === value ? 'var(--accent-soft)' : 'none',
+                border: 'none', padding: '10px 12px', borderRadius: 10,
+                fontSize: 13.5, cursor: 'pointer',
+                color: opt.id === value ? 'var(--accent-deep)' : 'var(--text)',
+                fontWeight: opt.id === value ? 700 : 400, fontFamily: 'inherit',
+              }}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <button onClick={() => onChange(!checked)} style={{
+        width: 40, height: 23, borderRadius: 999,
+        background: checked ? 'linear-gradient(145deg,var(--accent),var(--accent-deep))' : 'var(--surface-3)',
+        position: 'relative', cursor: 'pointer', flexShrink: 0, transition: '.2s', border: 'none',
+      }}>
+        <span style={{
+          position: 'absolute', top: 2.5,
+          left: checked ? 19.5 : 2.5,
+          width: 18, height: 18, borderRadius: '50%',
+          background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.25)', transition: '.2s',
+        }} />
+      </button>
+      <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-muted)' }}>{label}</span>
+    </div>
+  );
+}
+
+export function GeneratorPanel({ services }: Props) {
+  const gen = useGenerator();
+  const { state } = gen;
+  const [advOpen, setAdvOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    const ok = await gen.copyConfig();
+    if (ok) { setCopied(true); setTimeout(() => setCopied(false), 2000); }
+  };
+
+  const configText = state.result ? atob(state.result.configBase64) : '';
+
+  return (
+    <div style={{
+      background: 'var(--surface)', border: '1px solid var(--line)',
+      borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)', padding: 34,
+    }}>
+      <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 22px' }}>Параметры соединения</h3>
+
+      <div style={{
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16,
+        opacity: state.isGenerated ? .5 : 1,
+        pointerEvents: state.isGenerated ? 'none' : 'auto',
+      }} className="field-grid">
+        <Dropdown label="Формат конфигурации" value={state.configFormat}
+          options={CONFIG_FORMATS.map((f) => ({ id: f.id, label: f.name }))}
+          onChange={(v) => gen.set('configFormat', v as ConfigFormat)} />
+        <Dropdown label="Настройки соединения" value={state.deviceType}
+          options={[{ id: 'awg15', label: 'AmneziaWG 1.5' }]}
+          onChange={(v) => gen.set('deviceType', v as DeviceType)} />
+        <Dropdown label="DNS" value={state.dnsId}
+          options={DNS_PROVIDERS.map((d) => ({ id: d.id, label: d.isCommunity ? `${d.label} •` : d.label }))}
+          onChange={gen.setDnsId} />
+        <Dropdown label="Тип конфигурации" value={state.siteMode}
+          options={[
+            { id: 'all', label: 'Все сайты' },
+            { id: 'specific', label: isCommunityDns(state.dnsId) ? 'Определенные сайты (недоступно)' : 'Определенные сайты' },
+          ]}
+          onChange={(v) => gen.setSiteMode(v as SiteMode)} />
+      </div>
+
+      {/* Service picker */}
+      {state.siteMode === 'specific' && !isCommunityDns(state.dnsId) && !state.isGenerated && (
+        <ServicePicker services={services} selected={state.selectedServices} onToggle={gen.toggleService} />
+      )}
+
+      {/* Exclude LAN */}
+      {state.siteMode === 'all' && !state.isGenerated && (
+        <div style={{ padding: '6px 2px 22px' }}>
+          <Toggle checked={state.excludeLan} onChange={(v) => gen.set('excludeLan', v)} label="Исключить локальную сеть (LAN) из тоннеля" />
+        </div>
+      )}
+
+      {/* Advanced settings */}
+      {!state.isGenerated && (
+        <>
+          <button onClick={() => setAdvOpen((o) => !o)} style={{
+            display: 'flex', alignItems: 'center', gap: 7,
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 13.5, fontWeight: 700, color: 'var(--text-muted)',
+            padding: '0 0 20px', fontFamily: 'inherit', transition: '.15s',
+          }}>
+            Дополнительные настройки
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              style={{ transition: 'transform .2s', transform: advOpen ? 'rotate(180deg)' : 'none' }}>
+              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </button>
+          {advOpen && (
+            <div style={{
+              marginBottom: 18, padding: '14px 16px',
+              background: 'var(--surface-2)', borderRadius: 'var(--radius-md)',
+              display: 'flex', flexDirection: 'column', gap: 14,
+            }}>
+              <Toggle checked={state.ipv6} onChange={(v) => gen.set('ipv6', v)} label="IPv6" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' as const }}>
+                <Toggle checked={state.keepaliveEnabled} onChange={(v) => gen.set('keepaliveEnabled', v)} label="PersistentKeepalive" />
+                {state.keepaliveEnabled && (
+                  <input type="text" inputMode="numeric" maxLength={5}
+                    value={state.keepaliveValue}
+                    onChange={(e) => gen.set('keepaliveValue', e.target.value.replace(/\D/g, ''))}
+                    placeholder="25"
+                    style={{
+                      width: 56, height: 32, background: 'var(--surface-3)',
+                      borderRadius: 8, border: 'none', textAlign: 'center',
+                      fontSize: 13, color: 'var(--text)', outline: 'none', fontFamily: 'inherit',
+                    }} />
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Toggle checked={state.customI1Enabled} onChange={(v) => gen.set('customI1Enabled', v)} label="Собственный I1" />
+                {state.customI1Enabled && (
+                  <input type="text" value={state.customI1Domain}
+                    onChange={(e) => gen.set('customI1Domain', e.target.value)}
+                    placeholder="Введите домен (например, google.com)"
+                    style={{
+                      width: '100%', height: 36, background: 'var(--surface-3)',
+                      borderRadius: 10, border: 'none', padding: '0 12px',
+                      fontSize: 13, color: 'var(--text)', outline: 'none', fontFamily: 'inherit',
+                    }} />
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Generate / Reset button */}
+      {!state.isGenerated ? (
+        <button onClick={gen.handleGenerate} disabled={state.isLoading} style={{
+          width: '100%', height: 56, border: 'none', borderRadius: 'var(--radius-md)',
+          cursor: state.isLoading ? 'wait' : 'pointer',
+          background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+          color: '#fff', fontSize: 15, fontWeight: 700,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          boxShadow: '0 16px 32px -14px rgba(67,38,196,.6)',
+          transition: 'transform .15s', opacity: state.isLoading ? .7 : 1,
+          fontFamily: 'inherit',
+        }}>
+          {state.isLoading ? (
+            <>
+              <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40" strokeLinecap="round" />
+              </svg>
+              Генерируем...
+            </>
+          ) : (
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor" />
+              </svg>
+              Сгенерировать конфигурацию
+            </>
+          )}
+        </button>
+      ) : (
+        <button onClick={gen.reset} style={{
+          width: '100%', height: 56, border: '1px solid var(--line)',
+          borderRadius: 'var(--radius-md)', cursor: 'pointer',
+          background: 'var(--surface-2)', color: 'var(--text-muted)',
+          fontSize: 14, fontWeight: 600,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          transition: '.15s', fontFamily: 'inherit',
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          Сгенерировать заново
+        </button>
+      )}
+
+      {/* Error */}
+      {state.error && (
+        <div style={{
+          marginTop: 12, padding: '12px 14px',
+          background: 'rgba(239,68,68,.08)', borderRadius: 10,
+          fontSize: 13, color: '#ef4444',
+        }}>{state.error}</div>
+      )}
+
+      {/* Result block */}
+      {state.isGenerated && state.result && (
+        <div className="animate-in" style={{
+          marginTop: 20, background: 'var(--surface-2)',
+          border: '1px solid var(--line)', borderRadius: 'var(--radius-md)', padding: '20px 22px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{
+              fontSize: 12.5, fontWeight: 700, color: 'var(--green)',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Конфигурация готова
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={gen.downloadConfig} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                border: 'none', borderRadius: 10, padding: '7px 14px',
+                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                color: '#fff', fontFamily: 'inherit',
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                Скачать
+              </button>
+              <button onClick={handleCopy} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: '#fff', border: '1px solid var(--line)', borderRadius: 10,
+                padding: '7px 12px', fontSize: 12.5, fontWeight: 700,
+                cursor: 'pointer', color: 'var(--text-muted)', fontFamily: 'inherit',
+              }}>
+                {copied ? 'Скопировано ✓' : (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                      <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" />
+                      <path d="M5 15V5a2 2 0 012-2h10" stroke="currentColor" strokeWidth="2" />
+                    </svg>
+                    Копировать
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          <pre style={{
+            margin: 0, fontSize: 12.5, lineHeight: 1.7, color: '#4a3f66',
+            whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>{configText}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
