@@ -43,10 +43,8 @@ export function Topbar({ activeTab, onTabChange, onScrollTo }: TopbarProps) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', boxShadow: '0 6px 14px -6px rgba(67,38,196,.6)',
           }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2l8 3.5v6c0 5-3.4 8.7-8 10.5-4.6-1.8-8-5.5-8-10.5v-6L12 2z"
-                stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M18 10h-.3A6 6 0 0 0 6.5 10.5 4 4 0 0 0 8 18h10a4 4 0 0 0 0-8z" fill="currentColor" fillOpacity=".9"/>
             </svg>
           </div>
           WARP Generator
