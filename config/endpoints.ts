@@ -2,9 +2,9 @@ export interface EndpointOption {
   id: string;
   label: string;
   value: string;
-  /** If set, clicking this option opens a link instead of using the endpoint */
-  externalUrl?: string;
   flag?: string;
+  /** URL прокси-сервера для регистрации в Cloudflare (вместо прямого запроса) */
+  proxyUrl?: string;
 }
 
 export const ENDPOINTS: EndpointOption[] = [
@@ -23,6 +23,13 @@ export const ENDPOINTS: EndpointOption[] = [
     label: 'Указать свой адрес',
     value: '',
   },
+  {
+    id: 'server-de',
+    label: 'Германия',
+    value: 'engage.cloudflareclient.com:2408',
+    flag: 'DE',
+    proxyUrl: 'https://warp-endpoint-de.vercel.app/api/warp',
+  },
 ];
 
 export function getEndpointValue(id: string, customValue?: string): string {
@@ -31,7 +38,11 @@ export function getEndpointValue(id: string, customValue?: string): string {
   return ep?.value || 'engage.cloudflareclient.com:4500';
 }
 
-export function isExternalEndpoint(id: string): string | null {
+export function getProxyUrl(id: string): string | null {
   const ep = ENDPOINTS.find((e) => e.id === id);
-  return ep?.externalUrl ?? null;
+  return ep?.proxyUrl ?? null;
+}
+
+export function isExternalEndpoint(id: string): string | null {
+  return null; // tg-ссылки убраны
 }

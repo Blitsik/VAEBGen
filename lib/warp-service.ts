@@ -9,6 +9,7 @@ import { pickI1 } from './builders/shared';
 import { generateI1Line } from './quic';
 import { generateQR, unsupportedQR } from './qr-generator';
 import { getFileName, getFormatInfo, supportsQR } from '@/config/formats';
+import { getProxyUrl } from '@/config/endpoints';
 
 export class WarpGenerationError extends Error {
   constructor(message: string) {
@@ -31,8 +32,9 @@ export async function generateWarpConfig(req: GenerateRequest): Promise<Generate
     // 1. Generate keys
     const keyPair = generateKeyPair();
 
-    // 2. Register with Cloudflare
-    const { id: clientId, token } = await registerClient(keyPair.publicKey);
+    // 2. Register with Cloudflare (напрямую или через прокси нужного региона)
+    const proxyUrl = effectiveReq.endpointId ? getProxyUrl(effectiveReq.endpointId) : null;
+    const { id: clientId, token } = await registerClient(keyPair.publicKey, proxyUrl);
 
     // 3. Enable WARP
     const warpResponse = await enableWarp(clientId, token);

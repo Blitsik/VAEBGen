@@ -114,6 +114,7 @@ export function useGenerator() {
           siteMode: state.siteMode,
           deviceType: state.deviceType,
           endpoint,
+          endpointId: state.endpointId,
           configFormat: state.configFormat,
           dnsId: state.dnsId,
           ipv6: state.ipv6,

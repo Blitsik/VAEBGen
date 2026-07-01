@@ -5,6 +5,8 @@ export interface GenerateRequest {
   siteMode: SiteMode;
   deviceType: DeviceType;
   endpoint: string;
+  /** ID выбранного endpoint (для определения proxyUrl региона) */
+  endpointId?: string;
   configFormat: ConfigFormat;
   /** DNS provider id (see config/dns.ts). Defaults to 'cf'. */
   dnsId?: string;

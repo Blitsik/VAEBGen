@@ -8,8 +8,14 @@ const DEFAULT_HEADERS = {
 };
 
 export async function registerClient(
-  publicKey: string
+  publicKey: string,
+  proxyUrl?: string | null
 ): Promise<{ id: string; token: string }> {
+  // Если задан proxyUrl — регистрируемся через внешний endpoint (нужный регион)
+  if (proxyUrl) {
+    return registerViaProxy(publicKey, proxyUrl);
+  }
+
   const body = {
     install_id: '',
     tos: new Date().toISOString(),
@@ -34,6 +40,36 @@ export async function registerClient(
   }
 
   return { id: data.result.id, token: data.result.token };
+}
+
+/**
+ * Регистрация через внешний Vercel-прокси.
+ * Прокси сам стучится в Cloudflare из своего региона и возвращает id + token.
+ */
+async function registerViaProxy(
+  publicKey: string,
+  proxyUrl: string
+): Promise<{ id: string; token: string }> {
+  const res = await fetch(proxyUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ publicKey }),
+  });
+
+  if (!res.ok) throw new Error(`Proxy registration failed: HTTP ${res.status}`);
+
+  const data = await res.json();
+
+  if (!data.ok) {
+    throw new Error(data.error || 'Proxy returned error');
+  }
+
+  // Прокси возвращает id и token напрямую из Cloudflare
+  if (!data.id || !data.token) {
+    throw new Error('Proxy did not return id/token');
+  }
+
+  return { id: data.id, token: data.token };
 }
 
 export async function enableWarp(

@@ -5,9 +5,13 @@ import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
 import { DNS_PROVIDERS } from '@/config/dns';
+import { ENDPOINTS } from '@/config/endpoints';
 import { ServicePicker } from './service-picker';
 import type { ServiceEntry } from '@/types';
 import type { ConfigFormat, DeviceType, SiteMode } from '@/types';
+
+// Флаги стран
+const FLAG: Record<string, string> = { DE: '🇩🇪', NL: '🇳🇱', FI: '🇫🇮', PL: '🇵🇱', US: '🇺🇸', FR: '🇫🇷' };
 
 interface Props { services: ServiceEntry[]; }
 
@@ -123,6 +127,12 @@ export function GeneratorPanel({ services }: Props) {
             { id: 'specific', label: isCommunityDns(state.dnsId) ? 'Определенные сайты (недоступно)' : 'Определенные сайты' },
           ]}
           onChange={(v) => gen.setSiteMode(v as SiteMode)} />
+        <Dropdown label="Регион подключения" value={state.endpointId}
+          options={ENDPOINTS.filter(e => !e.proxyUrl || true).map((e) => ({
+            id: e.id,
+            label: e.flag ? `${FLAG[e.flag] ?? ''} ${e.label}` : e.label,
+          }))}
+          onChange={gen.setEndpoint} />
       </div>
 
       {/* Service picker */}
