@@ -39,9 +39,9 @@ export function Topbar({ activeTab, onTabChange, onScrollTo }: TopbarProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, fontSize: 14.5 }}>
           <div style={{
             width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+            background: 'linear-gradient(145deg, #ff8c00, #f97316)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', boxShadow: '0 6px 14px -6px rgba(67,38,196,.6)',
+            color: '#fff', boxShadow: '0 6px 14px -6px rgba(249,115,22,.6)',
           }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M18 10h-.3A6 6 0 0 0 6.5 10.5 4 4 0 0 0 8 18h10a4 4 0 0 0 0-8z" fill="currentColor" fillOpacity=".9"/>
