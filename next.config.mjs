@@ -5,6 +5,22 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      { protocol: 'https', hostname: 'api.qrserver.com' },
+    ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "img-src 'self' data: blob: https://api.qrserver.com;",
+          },
+        ],
+      },
+    ];
   },
 };
 

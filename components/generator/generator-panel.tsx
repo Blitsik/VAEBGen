@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
@@ -341,9 +341,23 @@ export function GeneratorPanel({ services }: Props) {
   );
 }
 
-// QR через прямой img src — браузер сам загружает картинку с qrserver
+// QR через fetch+blob — работает без ограничений на длину URL
 function QRBlock({ configText }: { configText: string }) {
-  const src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&ecc=M&data=${encodeURIComponent(configText)}`;
+  const [blobUrl, setBlobUrl] = useState<string>('');
+
+  useEffect(() => {
+    if (!configText) return;
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&ecc=M&data=${encodeURIComponent(configText)}`;
+    fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        const objectUrl = URL.createObjectURL(blob);
+        setBlobUrl(objectUrl);
+      })
+      .catch(console.error);
+    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configText]);
 
   return (
     <div className="animate-in" style={{
@@ -352,13 +366,13 @@ function QRBlock({ configText }: { configText: string }) {
       background: '#fff', borderRadius: 'var(--radius-md)',
       padding: '20px 16px', border: '1px solid var(--line)',
     }}>
-      <img
-        src={src}
-        alt="QR код конфигурации"
-        width={240}
-        height={240}
-        style={{ borderRadius: 8 }}
-      />
+      {blobUrl ? (
+        <img src={blobUrl} alt="QR код" width={240} height={240} style={{ borderRadius: 8 }} />
+      ) : (
+        <div style={{ width: 240, height: 240, background: 'var(--surface-2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'var(--text-dim)' }}>
+          Загрузка QR...
+        </div>
+      )}
       <div style={{ textAlign: 'center' }}>
         <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
           Сканируйте в AmneziaWG
