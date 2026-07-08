@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
@@ -326,33 +326,7 @@ export function GeneratorPanel({ services }: Props) {
 
           {/* QR код */}
           {showQR && hasQR && (
-            <div className="animate-in" style={{
-              marginBottom: 16, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', gap: 12,
-              background: '#fff', borderRadius: 'var(--radius-md)',
-              padding: '20px 16px', border: '1px solid var(--line)',
-            }}>
-              {state.result!.qrCodeBase64.startsWith('data:image') ? (
-                <img
-                  src={state.result!.qrCodeBase64}
-                  alt="QR код конфигурации"
-                  width={220} height={220}
-                  style={{ borderRadius: 8 }}
-                />
-              ) : (
-                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-                  Загрузка QR...
-                </div>
-              )}
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-                  Сканируйте в AmneziaWG
-                </p>
-                <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-dim)' }}>
-                  Откройте приложение → + → Сканировать QR-код
-                </p>
-              </div>
-            </div>
+            <QRBlock configText={configText} />
           )}
 
           {/* Config text */}
@@ -363,6 +337,49 @@ export function GeneratorPanel({ services }: Props) {
           }}>{configText}</pre>
         </div>
       )}
+    </div>
+  );
+}
+
+// QR генерируется прямо в браузере через canvas — без серверных запросов
+function QRBlock({ configText }: { configText: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!configText || !canvasRef.current) return;
+    import('qrcode').then((mod) => {
+      const QRCode = mod.default;
+      QRCode.toCanvas(canvasRef.current!, configText, {
+        width: 240,
+        margin: 2,
+        color: { dark: '#191333', light: '#ffffff' },
+        errorCorrectionLevel: 'M',
+      }).then(() => setReady(true)).catch(console.error);
+    });
+  }, [configText]);
+
+  return (
+    <div className="animate-in" style={{
+      marginBottom: 16, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', gap: 12,
+      background: '#fff', borderRadius: 'var(--radius-md)',
+      padding: '20px 16px', border: '1px solid var(--line)',
+    }}>
+      <canvas ref={canvasRef} style={{ borderRadius: 8, display: ready ? 'block' : 'none' }} />
+      {!ready && (
+        <div style={{ width: 240, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
+          Генерация QR...
+        </div>
+      )}
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+          Сканируйте в AmneziaWG
+        </p>
+        <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-dim)' }}>
+          Откройте приложение → + → Сканировать QR-код
+        </p>
+      </div>
     </div>
   );
 }
