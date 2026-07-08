@@ -91,6 +91,7 @@ export function GeneratorPanel({ services }: Props) {
   const { state } = gen;
   const [advOpen, setAdvOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const handleCopy = async () => {
     const ok = await gen.copyConfig();
@@ -98,6 +99,7 @@ export function GeneratorPanel({ services }: Props) {
   };
 
   const configText = state.result ? atob(state.result.configBase64) : '';
+  const hasQR = state.result?.qrCodeBase64?.startsWith('data:image/png');
 
   return (
     <div style={{
@@ -257,6 +259,7 @@ export function GeneratorPanel({ services }: Props) {
           marginTop: 20, background: 'var(--surface-2)',
           border: '1px solid var(--line)', borderRadius: 'var(--radius-md)', padding: '20px 22px',
         }}>
+          {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{
               fontSize: 12.5, fontWeight: 700, color: 'var(--green)',
@@ -296,8 +299,57 @@ export function GeneratorPanel({ services }: Props) {
                   </>
                 )}
               </button>
+              {/* QR кнопка — только для AmneziaWG */}
+              {hasQR && (
+                <button onClick={() => setShowQR(v => !v)} style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: showQR ? 'var(--accent-soft)' : '#fff',
+                  border: `1px solid ${showQR ? 'var(--accent)' : 'var(--line)'}`,
+                  borderRadius: 10, padding: '7px 12px',
+                  fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                  color: showQR ? 'var(--accent-deep)' : 'var(--text-muted)',
+                  fontFamily: 'inherit',
+                }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="2" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="2" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="2" y="14" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="14" y="14" width="3.5" height="3.5" rx=".5" fill="currentColor"/>
+                    <rect x="19.5" y="18" width="2.5" height="4" rx=".5" fill="currentColor"/>
+                    <rect x="14" y="19.5" width="4" height="2.5" rx=".5" fill="currentColor"/>
+                  </svg>
+                  QR
+                </button>
+              )}
             </div>
           </div>
+
+          {/* QR код */}
+          {showQR && hasQR && (
+            <div className="animate-in" style={{
+              marginBottom: 16, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', gap: 12,
+              background: '#fff', borderRadius: 'var(--radius-md)',
+              padding: '20px 16px', border: '1px solid var(--line)',
+            }}>
+              <img
+                src={state.result!.qrCodeBase64}
+                alt="QR код конфигурации"
+                width={220} height={220}
+                style={{ borderRadius: 8, imageRendering: 'pixelated' }}
+              />
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                  Сканируйте в AmneziaWG
+                </p>
+                <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-dim)' }}>
+                  Откройте приложение → + → Сканировать QR-код
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Config text */}
           <pre style={{
             margin: 0, fontSize: 12.5, lineHeight: 1.7, color: '#4a3f66',
             whiteSpace: 'pre-wrap', wordBreak: 'break-all',
