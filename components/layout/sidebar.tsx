@@ -13,24 +13,13 @@ export function Sidebar() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {/* Banner */}
-      <div style={{
-        borderRadius: 'var(--radius-lg)',
-        overflow: 'hidden',
-        position: 'relative',
-        height: 150,
-        background: 'linear-gradient(160deg, var(--accent-deep), var(--accent) 55%, #c9a6ff)',
-        boxShadow: 'var(--shadow-md)',
-      }}>
-        <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-          <circle cx="40" cy="30" r="70" fill="#ffffff22" />
-          <circle cx="290" cy="130" r="90" fill="#ffffff18" />
-          <path d="M20 100 C 90 40, 200 160, 300 60" stroke="#ffffff55" strokeWidth="2" fill="none" strokeDasharray="2 8" />
-        </svg>
-        <div style={{ position: 'absolute', left: 20, bottom: 16, color: '#fff' }}>
-          <b style={{ display: 'block', fontFamily: "'Unbounded', sans-serif", fontSize: 14 }}>WARP Generator</b>
-          <span style={{ fontSize: 11.5, opacity: .85 }}>Cloudflare WARP конфиги</span>
+      {/* Info images instead of banner */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+          <Image src="/info1.png" alt="Инструкция 1" width={340} height={200} style={{ width: '100%', height: 'auto', display: 'block' }} />
+        </div>
+        <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+          <Image src="/info2.png" alt="Инструкция 2" width={340} height={200} style={{ width: '100%', height: 'auto', display: 'block' }} />
         </div>
       </div>
 
