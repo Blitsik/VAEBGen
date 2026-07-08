@@ -382,9 +382,91 @@ export function GeneratorPanel({ services }: Props) {
                 </svg>
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <img src="/info1.png" alt="Туториал шаг 1" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />
-              <img src="/info2.png" alt="Туториал шаг 2" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* Step 1 */}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 14, fontFamily: "'Unbounded', sans-serif",
+                }}>1</div>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Настройте параметры</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                    Выберите <b>формат конфигурации</b> — AmneziaWG подходит для большинства устройств.
+                    Оставьте DNS <b>1.1.1.1</b> и тип <b>Все сайты</b> если не знаете что менять.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--line)' }} />
+
+              {/* Step 2 */}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 14, fontFamily: "'Unbounded', sans-serif",
+                }}>2</div>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Нажмите «Сгенерировать»</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                    Сервер создаст уникальный конфиг с вашими ключами. Это занимает 1–3 секунды.
+                    Ключи генерируются на лету и <b>нигде не сохраняются</b>.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--line)' }} />
+
+              {/* Step 3 */}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 14, fontFamily: "'Unbounded', sans-serif",
+                }}>3</div>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Скачайте конфиг</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                    Нажмите <b>Скачать</b> — получите файл <code style={{ background: 'var(--surface-2)', padding: '1px 6px', borderRadius: 4, fontSize: 12 }}>.conf</code> или <code style={{ background: 'var(--surface-2)', padding: '1px 6px', borderRadius: 4, fontSize: 12 }}>.yaml</code>.
+                    Или нажмите <b>Копировать</b> чтобы вставить прямо в приложение.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ height: 1, background: 'var(--line)' }} />
+
+              {/* Step 4 */}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 14, fontFamily: "'Unbounded', sans-serif",
+                }}>4</div>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>Импортируйте в приложение</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                    Откройте <b>AmneziaWG</b> (Android/iOS/Windows) → нажмите <b>+</b> → <b>Импорт из файла</b>.
+                    Выберите скачанный файл и подключайтесь.
+                  </p>
+                  <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {['AmneziaWG', 'WG Tunnel', 'WireSock', 'Clash'].map(app => (
+                      <span key={app} style={{
+                        fontSize: 11.5, fontWeight: 600, padding: '4px 10px',
+                        background: 'var(--accent-soft)', color: 'var(--accent-deep)',
+                        borderRadius: 999, border: '1px solid var(--accent-soft)',
+                      }}>{app}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
