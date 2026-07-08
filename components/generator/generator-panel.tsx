@@ -91,7 +91,7 @@ export function GeneratorPanel({ services }: Props) {
   const { state } = gen;
   const [advOpen, setAdvOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+  const [showQR] = useState(false);
 
   const handleCopy = async () => {
     const ok = await gen.copyConfig();
@@ -99,7 +99,7 @@ export function GeneratorPanel({ services }: Props) {
   };
 
   const configText = state.result ? atob(state.result.configBase64) : '';
-  const hasQR = state.result?.configFormat === 'wireguard';
+  const hasQR = false; // QR отключён
 
   return (
     <div style={{
