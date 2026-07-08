@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
@@ -341,21 +341,20 @@ export function GeneratorPanel({ services }: Props) {
   );
 }
 
-// QR генерируется прямо в браузере через canvas — без серверных запросов
+// QR генерируется прямо в браузере через qrcode — без серверных запросов
 function QRBlock({ configText }: { configText: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [ready, setReady] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string>('');
 
   useEffect(() => {
-    if (!configText || !canvasRef.current) return;
+    if (!configText) return;
     import('qrcode').then((mod) => {
       const QRCode = mod.default;
-      QRCode.toCanvas(canvasRef.current!, configText, {
+      QRCode.toDataURL(configText, {
         width: 240,
         margin: 2,
         color: { dark: '#191333', light: '#ffffff' },
         errorCorrectionLevel: 'M',
-      }).then(() => setReady(true)).catch(console.error);
+      }).then((url: string) => setQrUrl(url)).catch(console.error);
     });
   }, [configText]);
 
@@ -366,8 +365,9 @@ function QRBlock({ configText }: { configText: string }) {
       background: '#fff', borderRadius: 'var(--radius-md)',
       padding: '20px 16px', border: '1px solid var(--line)',
     }}>
-      <canvas ref={canvasRef} style={{ borderRadius: 8, display: ready ? 'block' : 'none' }} />
-      {!ready && (
+      {qrUrl ? (
+        <img src={qrUrl} alt="QR код" width={240} height={240} style={{ borderRadius: 8 }} />
+      ) : (
         <div style={{ width: 240, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
           Генерация QR...
         </div>
