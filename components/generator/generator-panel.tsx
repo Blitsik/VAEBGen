@@ -92,6 +92,7 @@ export function GeneratorPanel({ services }: Props) {
   const [advOpen, setAdvOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showQR] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const handleCopy = async () => {
     const ok = await gen.copyConfig();
@@ -201,32 +202,51 @@ export function GeneratorPanel({ services }: Props) {
 
       {/* Generate / Reset button */}
       {!state.isGenerated ? (
-        <button onClick={gen.handleGenerate} disabled={state.isLoading} style={{
-          width: '100%', height: 56, border: 'none', borderRadius: 'var(--radius-md)',
-          cursor: state.isLoading ? 'wait' : 'pointer',
-          background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
-          color: '#fff', fontSize: 15, fontWeight: 700,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-          boxShadow: '0 16px 32px -14px rgba(67,38,196,.6)',
-          transition: 'transform .15s', opacity: state.isLoading ? .7 : 1,
-          fontFamily: 'inherit',
-        }}>
-          {state.isLoading ? (
-            <>
-              <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40" strokeLinecap="round" />
-              </svg>
-              Генерируем...
-            </>
-          ) : (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor" />
-              </svg>
-              Сгенерировать конфигурацию
-            </>
-          )}
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={gen.handleGenerate} disabled={state.isLoading} style={{
+            flex: 1, height: 56, border: 'none', borderRadius: 'var(--radius-md)',
+            cursor: state.isLoading ? 'wait' : 'pointer',
+            background: 'linear-gradient(145deg, var(--accent), var(--accent-deep))',
+            color: '#fff', fontSize: 15, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            boxShadow: '0 16px 32px -14px rgba(67,38,196,.6)',
+            transition: 'transform .15s', opacity: state.isLoading ? .7 : 1,
+            fontFamily: 'inherit',
+          }}>
+            {state.isLoading ? (
+              <>
+                <svg className="spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeDasharray="40" strokeLinecap="round" />
+                </svg>
+                Генерируем...
+              </>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" fill="currentColor" />
+                </svg>
+                Сгенерировать конфигурацию
+              </>
+            )}
+          </button>
+          <button onClick={() => setShowTutorial(true)} style={{
+            height: 56, padding: '0 18px', border: '1px solid var(--line)',
+            borderRadius: 'var(--radius-md)', cursor: 'pointer',
+            background: 'var(--surface-2)', color: 'var(--text-muted)',
+            fontSize: 13, fontWeight: 700,
+            display: 'flex', alignItems: 'center', gap: 7,
+            transition: '.15s', fontFamily: 'inherit', whiteSpace: 'nowrap' as const,
+          }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-3)'; e.currentTarget.style.color = 'var(--text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 16v-4m0-4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            Туториал
+          </button>
+        </div>
       ) : (
         <button onClick={gen.reset} style={{
           width: '100%', height: 56, border: '1px solid var(--line)',
@@ -335,6 +355,38 @@ export function GeneratorPanel({ services }: Props) {
             whiteSpace: 'pre-wrap', wordBreak: 'break-all',
             fontFamily: "'JetBrains Mono', monospace",
           }}>{configText}</pre>
+        </div>
+      )}
+
+      {/* Tutorial modal */}
+      {showTutorial && (
+        <div onClick={() => setShowTutorial(false)} style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(25,19,51,.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div onClick={(e) => e.stopPropagation()} className="animate-in" style={{
+            background: 'var(--surface)', borderRadius: 'var(--radius-xl)',
+            boxShadow: 'var(--shadow-lg)', padding: 28,
+            maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Как использовать</h3>
+              <button onClick={() => setShowTutorial(false)} style={{
+                background: 'var(--surface-2)', border: 'none', borderRadius: 8,
+                width: 32, height: 32, cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <img src="/info1.png" alt="Туториал шаг 1" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />
+              <img src="/info2.png" alt="Туториал шаг 2" style={{ width: '100%', borderRadius: 'var(--radius-md)' }} />
+            </div>
+          </div>
         </div>
       )}
     </div>
