@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import QRCode from 'react-qr-code';
 import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
@@ -342,8 +341,10 @@ export function GeneratorPanel({ services }: Props) {
   );
 }
 
-// QR рендерится как SVG прямо в браузере — никаких зависимостей от Canvas
+// QR через прямой img src — браузер сам загружает картинку с qrserver
 function QRBlock({ configText }: { configText: string }) {
+  const src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&ecc=M&data=${encodeURIComponent(configText)}`;
+
   return (
     <div className="animate-in" style={{
       marginBottom: 16, display: 'flex', flexDirection: 'column',
@@ -351,15 +352,13 @@ function QRBlock({ configText }: { configText: string }) {
       background: '#fff', borderRadius: 'var(--radius-md)',
       padding: '20px 16px', border: '1px solid var(--line)',
     }}>
-      <div style={{ background: '#fff', padding: 12, borderRadius: 8 }}>
-        <QRCode
-          value={configText}
-          size={220}
-          fgColor="#191333"
-          bgColor="#ffffff"
-          level="M"
-        />
-      </div>
+      <img
+        src={src}
+        alt="QR код конфигурации"
+        width={240}
+        height={240}
+        style={{ borderRadius: 8 }}
+      />
       <div style={{ textAlign: 'center' }}>
         <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
           Сканируйте в AmneziaWG
