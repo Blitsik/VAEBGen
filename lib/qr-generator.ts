@@ -1,23 +1,29 @@
-import QRCode from 'qrcode';
-
 /**
- * Генерирует QR как SVG строку — не требует Canvas.
- * Работает на Vercel Node.js runtime.
+ * QR-генератор через Google Charts API (стабильно работает с сервера).
+ * Fallback — встроенная SVG заглушка.
  */
 export async function generateQR(text: string): Promise<string> {
   try {
-    // toString с type:'svg' не использует Canvas — только чистый JS
-    const svg = await QRCode.toString(text, {
-      type: 'svg',
-      margin: 2,
-      color: { dark: '#191333', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-      width: 280,
-    });
-    return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+    const url = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chld=M|2&chl=${encodeURIComponent(text)}`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const buf = await res.arrayBuffer();
+    const b64 = Buffer.from(buf).toString('base64');
+    return `data:image/png;base64,${b64}`;
   } catch (e) {
-    console.error('[QR] error:', e);
-    return fallbackSVG();
+    console.error('[QR] Google Charts failed, trying qrserver:', e);
+    // Второй fallback — qrserver.com
+    try {
+      const url2 = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(text)}`;
+      const res2 = await fetch(url2, { signal: AbortSignal.timeout(6000) });
+      if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+      const buf2 = await res2.arrayBuffer();
+      const b64_2 = Buffer.from(buf2).toString('base64');
+      return `data:image/png;base64,${b64_2}`;
+    } catch (e2) {
+      console.error('[QR] qrserver also failed:', e2);
+      return fallbackSVG();
+    }
   }
 }
 
