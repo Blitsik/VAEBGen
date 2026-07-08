@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import QRCode from 'react-qr-code';
 import { useGenerator } from '@/hooks/use-generator';
 import { isCommunityDns } from '@/config/dns';
 import { CONFIG_FORMATS } from '@/config/formats';
@@ -341,23 +342,8 @@ export function GeneratorPanel({ services }: Props) {
   );
 }
 
-// QR генерируется прямо в браузере через qrcode — без серверных запросов
+// QR рендерится как SVG прямо в браузере — никаких зависимостей от Canvas
 function QRBlock({ configText }: { configText: string }) {
-  const [qrUrl, setQrUrl] = useState<string>('');
-
-  useEffect(() => {
-    if (!configText) return;
-    import('qrcode').then((mod) => {
-      const QRCode = mod.default;
-      QRCode.toDataURL(configText, {
-        width: 240,
-        margin: 2,
-        color: { dark: '#191333', light: '#ffffff' },
-        errorCorrectionLevel: 'M',
-      }).then((url: string) => setQrUrl(url)).catch(console.error);
-    });
-  }, [configText]);
-
   return (
     <div className="animate-in" style={{
       marginBottom: 16, display: 'flex', flexDirection: 'column',
@@ -365,13 +351,15 @@ function QRBlock({ configText }: { configText: string }) {
       background: '#fff', borderRadius: 'var(--radius-md)',
       padding: '20px 16px', border: '1px solid var(--line)',
     }}>
-      {qrUrl ? (
-        <img src={qrUrl} alt="QR код" width={240} height={240} style={{ borderRadius: 8 }} />
-      ) : (
-        <div style={{ width: 240, height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: 13 }}>
-          Генерация QR...
-        </div>
-      )}
+      <div style={{ background: '#fff', padding: 12, borderRadius: 8 }}>
+        <QRCode
+          value={configText}
+          size={220}
+          fgColor="#191333"
+          bgColor="#ffffff"
+          level="M"
+        />
+      </div>
       <div style={{ textAlign: 'center' }}>
         <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
           Сканируйте в AmneziaWG
