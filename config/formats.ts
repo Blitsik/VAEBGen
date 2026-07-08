@@ -9,6 +9,13 @@ export const CONFIG_FORMATS: ConfigFormatInfo[] = [
     supportsQR: true,
   },
   {
+    id: 'throne',
+    name: 'Throne',
+    description: 'URI ссылка для Throne (.url)',
+    extension: 'url',
+    supportsQR: false,
+  },
+  {
     id: 'clash',
     name: 'Clash',
     description: 'Конфигурация для Clash Meta (.yaml)',
