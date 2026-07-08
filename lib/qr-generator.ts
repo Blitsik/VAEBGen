@@ -1,29 +1,24 @@
 /**
- * QR-генератор через Google Charts API (стабильно работает с сервера).
- * Fallback — встроенная SVG заглушка.
+ * QR-генератор через qrserver.com.
+ * Работает с серверного Node.js на Vercel без npm зависимостей.
  */
 export async function generateQR(text: string): Promise<string> {
   try {
-    const url = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chld=M|2&chl=${encodeURIComponent(text)}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&ecc=M&data=${encodeURIComponent(text)}`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: { 'User-Agent': 'WarpGenerator/2.0' },
+    });
+    if (!res.ok) throw new Error(`qrserver HTTP ${res.status}`);
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!contentType.includes('image')) throw new Error(`unexpected content-type: ${contentType}`);
     const buf = await res.arrayBuffer();
+    if (buf.byteLength < 100) throw new Error('response too small');
     const b64 = Buffer.from(buf).toString('base64');
     return `data:image/png;base64,${b64}`;
   } catch (e) {
-    console.error('[QR] Google Charts failed, trying qrserver:', e);
-    // Второй fallback — qrserver.com
-    try {
-      const url2 = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(text)}`;
-      const res2 = await fetch(url2, { signal: AbortSignal.timeout(6000) });
-      if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
-      const buf2 = await res2.arrayBuffer();
-      const b64_2 = Buffer.from(buf2).toString('base64');
-      return `data:image/png;base64,${b64_2}`;
-    } catch (e2) {
-      console.error('[QR] qrserver also failed:', e2);
-      return fallbackSVG();
-    }
+    console.error('[QR] failed:', e);
+    return fallbackSVG();
   }
 }
 

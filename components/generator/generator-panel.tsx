@@ -332,12 +332,18 @@ export function GeneratorPanel({ services }: Props) {
               background: '#fff', borderRadius: 'var(--radius-md)',
               padding: '20px 16px', border: '1px solid var(--line)',
             }}>
-              <img
-                src={state.result!.qrCodeBase64}
-                alt="QR код конфигурации"
-                width={220} height={220}
-                style={{ borderRadius: 8, imageRendering: 'pixelated' }}
-              />
+              {state.result!.qrCodeBase64.startsWith('data:image') ? (
+                <img
+                  src={state.result!.qrCodeBase64}
+                  alt="QR код конфигурации"
+                  width={220} height={220}
+                  style={{ borderRadius: 8 }}
+                />
+              ) : (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  Загрузка QR...
+                </div>
+              )}
               <div style={{ textAlign: 'center' }}>
                 <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
                   Сканируйте в AmneziaWG
