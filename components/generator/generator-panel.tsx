@@ -99,7 +99,7 @@ export function GeneratorPanel({ services }: Props) {
   };
 
   const configText = state.result ? atob(state.result.configBase64) : '';
-  const hasQR = state.result?.qrCodeBase64?.startsWith('data:image/png');
+  const hasQR = state.result?.configFormat === 'wireguard';
 
   return (
     <div style={{
